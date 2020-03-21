@@ -1,0 +1,79 @@
+# -*- mode: org -*-
+
+* A Picture Language in JavaScript
+
+This is a JavaScript implementation of Peter Henderson’s 1982 paper
+[[https://eprints.soton.ac.uk/257577/1/funcgeo2.pdf]["Functional Geometry"]]. The most important element in this small
+language is called a painter. A painter is a one-argument function,
+when called with a frame, "draws an image that is shifted and scaled
+to fit within a designated parallelogram-shaped frame". Since it's
+just a function, we can utilize closure and higher order function to
+combine simple painters to make complex painters. For more information,
+check out the aforementioned paper and [[https://sarabander.github.io/sicp/html/2_002e2.xhtml#g_t2_002e2_002e4][section 2.2.4]] of SICP.
+
+** Docs
+
+*Note* There's one difference between the implementation and the
+paper: beside a frame, a painter also need a canvas context to decide
+in which canvas it should be drawn.
+
+The implementation provides the following functions:
+
+*** Vectors
+
+- makeVect
+- addVect
+- subVect
+- scaleVect
+
+*** Frames
+
+- makeFrame
+- makeRelativeFrame
+- frameCoordMap
+
+*** Segments
+
+- makeSegment
+
+*** Drawing Functions
+
+- drawLine
+- line
+
+*** Primitive Painters
+
+- segmentsToPainter
+- vectsToPainter
+- svgPathToPainter
+- colorToPainter
+
+*** Built-in Painters
+
+- blank
+- fish
+- heart
+- black
+- grey
+
+*** Higher Order Painters
+
+- transformPainter
+- over
+- beside
+- above
+- flipVert
+- flipHoriz
+- identity
+- rot
+- rot45
+- rot180
+- rot270
+- quartet
+
+** Credits
+
+1. Some code was directly translated from the book to JavaScript.
+2. Some code was inspired by Racket's [[https://docs.racket-lang.org/sicp-manual/index.html][SICP package]].
+3. The built-in fish painter's bézier curve is copied from [[https://github.com/mapio/programming-with-escher][this repo]]
+   which in turn is copied from [[https://github.com/micahhahn/FunctionalGeometry][this repo]].

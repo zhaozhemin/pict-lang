@@ -1,0 +1,18 @@
+{
+  "name": "pict-lang",
+  "version": "0.1.0",
+  "description": "A JavaScript implementation of Peter Henderson's Functional Geometry.",
+  "type": "module",
+  "module": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "keywords": [],
+  "author": "Zhao Min",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.0"
+  }
+}
