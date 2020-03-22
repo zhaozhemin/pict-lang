@@ -13,9 +13,10 @@ check out the aforementioned paper and [[https://sarabander.github.io/sicp/html/
 
 ** Docs
 
-*Note* There's one difference between the implementation and the
-paper: beside a frame, a painter also need a canvas context to decide
-in which canvas it should be drawn.
+There's one difference between the implementation and the paper:
+beside a frame, a painter also need a canvas context to decide in
+which canvas it should be drawn. You also need [[https://www.npmjs.com/package/path-data-polyfill][path-data-polyfill]] to
+run this package.
 
 The implementation provides the following functions:
 
