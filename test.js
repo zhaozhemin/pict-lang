@@ -152,6 +152,21 @@ describe('higher order painters', function() {
     assert.deepEqual(pixelColor(p.rot45(p.black), 275, 50), [0, 0, 0, 0])
   })
 
+  it('mixing higher order painters', function() {
+    assert.deepEqual(
+      pixelColor(p.rot(p.above(painter, painter)), x, y),
+      pixelColor(p.beside(p.rot(painter), p.rot(painter)), x, y)
+    )
+    assert.deepEqual(
+      pixelColor(p.rot(p.beside(painter, painter)), x, y),
+      pixelColor(p.above(p.rot(painter), p.rot(painter)), x, y)
+    )
+    assert.deepEqual(
+      pixelColor(p.flipVert(p.beside(painter, painter)), x, y),
+      pixelColor(p.beside(p.flipVert(painter), p.flipVert(painter)), x, y)
+    )
+  })
+
 })
 
 

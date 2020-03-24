@@ -9,7 +9,7 @@ when called with a frame, "draws an image that is shifted and scaled
 to fit within a designated parallelogram-shaped frame". Since it's
 just a function, we can utilize closure and higher order function to
 combine simple painters to make complex painters. For more information,
-check out the aforementioned paper and [[https://sarabander.github.io/sicp/html/2_002e2.xhtml#g_t2_002e2_002e4][section 2.2.4]] of SICP.
+check out the aforementioned paper and [[https://sarabander.github.io/sicp/html/2_002e2.xhtml#g_t2_002e2_002e4][section 2.2.4]] of /SICP/.
 
 ** Docs
 
