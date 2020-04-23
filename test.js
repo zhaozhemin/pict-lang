@@ -179,7 +179,7 @@ function colorIndexes(x, y, width) {
 
 function pixelColor(painter, x, y) {
   let [canvas, ctx, frame] = p.init()
-  painter(frame, ctx)
+  painter(frame)(ctx)
   let data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
   let rgba = colorIndexes(x, y, canvas.width)
   return rgba.map(i => data[i])
@@ -213,5 +213,5 @@ function randomColorPalette() {
     )
   }
 
-  return (frame, ctx) => p.quartet(...tiles)(frame, ctx)
+  return frame => ctx => p.quartet(...tiles)(frame)(ctx)
 }

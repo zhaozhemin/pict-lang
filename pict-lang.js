@@ -127,7 +127,7 @@ export {drawLine, line, stroke, fill}
  * end. In other words, every segment is a sub-path. Fill won't work.
  */
 function segmentsToPainter(segments, {draw=stroke, style='#000'} = {}) {
-  return (frame, ctx) => {
+  return frame => ctx => {
     let tr = frameCoordMap(frame)
     ctx.beginPath()
     segments.forEach(seg => drawLine(tr(seg.start), tr(seg.end))(ctx))
@@ -142,7 +142,7 @@ function segmentsToPainter(segments, {draw=stroke, style='#000'} = {}) {
  * We moveTo the first vector, then lineTo rest vectors.
  */
 function vectsToPainter(vects, {draw=stroke, style='#000'} = {}) {
-  return (frame, ctx) => {
+  return frame => ctx => {
     let tr = frameCoordMap(frame)
     ctx.beginPath()
     line(...vects.map(v => tr(v)))(ctx)
@@ -162,7 +162,7 @@ function svgPathToPainter(path, {draw=stroke, style='#000'} = {}) {
   // getPathData is defined in a path-data-polyfill.js
   let data = elem.getPathData()
 
-  return (frame, ctx) => {
+  return frame => ctx => {
     let newPath = []
     let tr = frameCoordMap(frame)
 
@@ -209,7 +209,7 @@ export {segmentsToPainter, vectsToPainter, svgPathToPainter, colorToPainter}
 
 // Built-in Painters
 
-export const blank = (frame, ctx) => undefined
+export const blank = frame => ctx => undefined
 
 export const fish = svgPathToPainter(fishPath)
 
@@ -232,8 +232,9 @@ export const grey = colorToPainter({style: '#666767'})
  * origin, corner1, corner2 are all vectors in the unit square.
  */
 function transformPainter(painter, origin, corner1, corner2) {
-  return (frame, ctx) => {
-    painter(makeRelativeFrame(origin, corner1, corner2)(frame), ctx)
+  return frame => ctx => {
+    let newFrame = makeRelativeFrame(origin, corner1, corner2)(frame)
+    painter(newFrame)(ctx)
   }
 }
 
@@ -241,7 +242,7 @@ function transformPainter(painter, origin, corner1, corner2) {
  * Put serveral painters in the same frame.
  */
 function over(...painters) {
-  return (frame, ctx) => painters.forEach(painter => painter(frame, ctx))
+  return frame => ctx => painters.forEach(painter => painter(frame)(ctx))
 }
 
 /**
