@@ -81,7 +81,9 @@ function frameCoordMap(frame) {
   }
 }
 
-export {makeFrame, makeRelativeFrame, frameCoordMap}
+const unitSquare = makeFrame(zeroVect, makeVect(1, 0), makeVect(0, 1))
+
+export {makeFrame, makeRelativeFrame, frameCoordMap, unitSquare}
 
 // Segments
 //
@@ -118,6 +120,51 @@ const fill = CanvasRenderingContext2D.prototype.fill
 
 export {drawLine, line, stroke, fill}
 
+// Transformation
+
+/**
+ * Calculate the distance between two vects.
+ */
+function calcDistance(v1, v2) {
+  let {x: v1x, y: v1y} = v1
+  let {x: v2x, y: v2y} = v2
+  return Math.sqrt((v1x - v2x) ** 2 + (v1y - v2y) ** 2)
+}
+
+/**
+ * Set and restore the transformation matrix according to canvas size and frame.
+ */
+function withTransform(f) {
+  return frame => ctx => {
+    ctx.save()
+    let {width, height} = ctx.canvas
+    // Scale the unit square to the size of the canvas and flip its y-axis.
+    ctx.transform(width, 0, 0, -height, 0, height)
+    // Apply current frame in which the picture will be drawn.
+    ctx.transform(...frameToTransformation(frame))
+    let {origin, edge1, edge2} = transformationToFrame(ctx.getTransform())
+    let frameWidth = calcDistance(addVect(origin, edge1), origin)
+    let frameHeight = calcDistance(addVect(origin, edge2), origin)
+    // As to why we need to set lineWidth, please see the discussion at
+    // https://github.com/sicp-lang/sicp/issues/33
+    // I have to manually calculate the width, which is probably not ideal.
+    ctx.lineWidth = 1 / Math.min(frameWidth, frameHeight)
+    f(frame)(ctx)
+    ctx.restore()
+  }
+}
+
+function frameToTransformation(frame) {
+  let {origin, edge1, edge2} = frame
+  return [edge1.x, edge1.y, edge2.x, edge2.y, origin.x, origin.y]
+}
+
+function transformationToFrame(matrix) {
+  let {a, b, c, d, e, f} = matrix
+  let frame = makeFrame(makeVect(e, f), makeVect(a, b), makeVect(c, d))
+  return frame
+}
+
 // Primitive Painters
 
 /**
@@ -127,13 +174,14 @@ export {drawLine, line, stroke, fill}
  * end. In other words, every segment is a sub-path. Fill won't work.
  */
 function segmentsToPainter(segments, {draw=stroke, style='#000'} = {}) {
-  return frame => ctx => {
-    let tr = frameCoordMap(frame)
+  let f = frame => ctx => {
     ctx.beginPath()
-    segments.forEach(seg => drawLine(tr(seg.start), tr(seg.end))(ctx))
+    segments.forEach(seg => drawLine(seg.start, seg.end)(ctx))
     ctx[`${draw.name}Style`] = style
     draw.call(ctx)
   }
+
+  return withTransform(f)
 }
 
 /**
@@ -142,13 +190,14 @@ function segmentsToPainter(segments, {draw=stroke, style='#000'} = {}) {
  * We moveTo the first vector, then lineTo rest vectors.
  */
 function vectsToPainter(vects, {draw=stroke, style='#000'} = {}) {
-  return frame => ctx => {
-    let tr = frameCoordMap(frame)
+  let f = frame => ctx => {
     ctx.beginPath()
-    line(...vects.map(v => tr(v)))(ctx)
+    line(...vects)(ctx)
     ctx[`${draw.name}Style`] = style
     draw.call(ctx)
   }
+
+  return withTransform(f)
 }
 
 /**
@@ -156,42 +205,17 @@ function vectsToPainter(vects, {draw=stroke, style='#000'} = {}) {
  *
  * Coordinates must be 0 and 1.
  */
+// TODO: Currently the output picture will be upside down, because the
+// coordinate system is different between the unit square and the canvas. In
+// the unit square, the origin is the bottom left corner, whereas in the
+// canvas, the origin is the top left corner. Need to figure out the correct
+// transformation matrix.
 function svgPathToPainter(path, {draw=stroke, style='#000'} = {}) {
-  let elem = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-  elem.setAttribute('d', path)
-  // getPathData is defined in a path-data-polyfill.js
-  let data = elem.getPathData()
-
-  return frame => ctx => {
-    let newPath = []
-    let tr = frameCoordMap(frame)
-
-    for (let {type, values} of data) {
-      newPath.push(type)
-
-      let i = 0
-
-      while (i < values.length) {
-        if (type === 'H' || type === 'h') {
-          let v = tr(makeVect(values[i], y))
-          newPath.push(v.x)
-          i += 1
-        } else if (type === 'V' || type === 'v') {
-          let v = tr(makeVect(x, 1 - values[i]))
-          newPath.push(v.y)
-          i += 1
-        } else {
-          let v = tr(makeVect(values[i], 1 - values[i + 1]))
-          newPath.push(v.x)
-          newPath.push(v.y)
-          i += 2
-        }
-      }
-    }
-
-    ctx[`${draw.name}Style`] = style
-    draw.call(ctx, new Path2D(newPath.join(' ')))
+  let f = frame => ctx => {
+    draw.call(ctx, new Path2D(path))
   }
+
+  return withTransform(f)
 }
 
 /**
@@ -211,9 +235,9 @@ export {segmentsToPainter, vectsToPainter, svgPathToPainter, colorToPainter}
 
 export const blank = frame => ctx => undefined
 
-export const fish = svgPathToPainter(fishPath)
+export const fish = flipVert(svgPathToPainter(fishPath))
 
-export const heart = svgPathToPainter(heartPath, {draw: fill})
+export const heart = flipVert(svgPathToPainter(heartPath, {draw: fill}))
 
 export const black = colorToPainter()
 
@@ -338,22 +362,4 @@ function quartet(tl, tr, bl, br) {
 export {
   transformPainter, over, beside, above, flipVert, flipHoriz,
   identity, rot, rot45, rot180, rot270, quartet
-}
-
-// Initialization
-
-export function init(canvas) {
-  if (canvas == null) {
-    canvas = document.createElement('canvas')
-    canvas.height = 300
-  }
-
-  let ctx = canvas.getContext('2d')
-  let frame = makeFrame(
-    makeVect(0, canvas.height),
-    makeVect(canvas.width, 0),
-    makeVect(0, -canvas.height)
-  )
-
-  return [canvas, ctx, frame]
 }

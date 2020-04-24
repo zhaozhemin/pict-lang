@@ -178,8 +178,10 @@ function colorIndexes(x, y, width) {
 }
 
 function pixelColor(painter, x, y) {
-  let [canvas, ctx, frame] = p.init()
-  painter(frame)(ctx)
+  let canvas = document.createElement('canvas')
+  canvas.height = 300
+  let ctx = canvas.getContext('2d')
+  painter(p.unitSquare)(ctx)
   let data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
   let rgba = colorIndexes(x, y, canvas.width)
   return rgba.map(i => data[i])
