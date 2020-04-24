@@ -14,9 +14,9 @@ check out the aforementioned paper and [[https://sarabander.github.io/sicp/html/
 ** Docs
 
 There's one difference between the implementation and the paper:
-beside a frame, a painter also need a canvas context to decide in
-which canvas it should be drawn. You also need [[https://www.npmjs.com/package/path-data-polyfill][path-data-polyfill]] to
-run this package.
+beside a frame, a painter also needs a canvas context to decide in
+which canvas it should be drawn. A painter is actually a curried
+function; it should be called this way: ~painter(frame)(ctx)~.
 
 The implementation provides the following functions:
 
@@ -32,6 +32,7 @@ The implementation provides the following functions:
 - makeFrame
 - makeRelativeFrame
 - frameCoordMap
+- unitSquare
 
 *** Segments
 
@@ -48,6 +49,7 @@ The implementation provides the following functions:
 - vectsToPainter
 - svgPathToPainter
 - colorToPainter
+- imageToPainter
 
 *** Built-in Painters
 
@@ -72,9 +74,16 @@ The implementation provides the following functions:
 - rot270
 - quartet
 
+** Testing
+
+Start a web server in the root directory (for example, ~python -m
+http.server~), and open test.html. For imageToPainter testing to work,
+you need to supply your own picture.
+
 ** Credits
 
-1. Some code was directly translated from the book to JavaScript.
-2. Some code was inspired by Racket's [[https://docs.racket-lang.org/sicp-manual/index.html][SICP package]].
-3. The built-in fish painter's bézier curve is copied from [[https://github.com/mapio/programming-with-escher][this repo]]
+1. It's indebted to /SICP/ (some code was directly translated from
+   the book to JavaScript) and Racket's [[https://docs.racket-lang.org/sicp-manual/index.html][SICP package]] (especially the
+   matrix transformation part).
+2. The built-in fish painter's bézier curve is copied from [[https://github.com/mapio/programming-with-escher][this repo]]
    which in turn is copied from [[https://github.com/micahhahn/FunctionalGeometry][this repo]].
