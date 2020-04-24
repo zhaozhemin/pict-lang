@@ -208,8 +208,9 @@ function vectsToPainter(vects, {draw=stroke, style='#000'} = {}) {
 // TODO: Currently the output picture will be upside down, because the
 // coordinate system is different between the unit square and the canvas. In
 // the unit square, the origin is the bottom left corner, whereas in the
-// canvas, the origin is the top left corner. Need to figure out the correct
-// transformation matrix.
+// canvas, the origin is the top left corner. A simple workaround is to apply
+// flipVert to the painter. Need to figure out the correct transformation
+// matrix.
 function svgPathToPainter(path, {draw=stroke, style='#000'} = {}) {
   let f = frame => ctx => {
     draw.call(ctx, new Path2D(path))
@@ -229,6 +230,9 @@ function colorToPainter({draw=fill, style='#000'} = {}) {
   return vectsToPainter(vects, {draw: draw, style: style})
 }
 
+/**
+ * Create a painter from an image.
+ */
 function imageToPainter(image) {
   let f = frame => ctx => {
     let hiddenCanvas = document.createElement('canvas')
