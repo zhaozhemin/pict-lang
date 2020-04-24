@@ -169,6 +169,46 @@ describe('higher order painters', function() {
 
 })
 
+describe('image to painter', function() {
+  let x
+  let y
+
+  beforeEach(function() {
+    x = randomInt(0, 300)
+    y = randomInt(0, 300)
+  })
+
+  it('display', function(done) {
+    let image = new Image()
+    // Supply your own picture.
+    image.src = './ayanami.jpg'
+    image.addEventListener('load', event => {
+      let painter = p.imageToPainter(image)
+      assert.deepEqual(pixelColor(painter, 100, 100), [255, 255, 255, 255])
+      assert.deepEqual(pixelColor(painter, 200, 200), [154, 174, 201, 255])
+      assert.deepEqual(pixelColor(painter, 250, 175), [223, 173, 146, 255])
+      done()
+    })
+  })
+
+  it('mixing higher order painters', function(done) {
+    let image = new Image()
+    image.src = './ayanami.jpg'
+    image.addEventListener('load', event => {
+      let painter = p.imageToPainter(image)
+      assert.deepEqual(
+        pixelColor(p.rot(p.above(painter, painter)), x, y),
+        pixelColor(p.beside(p.rot(painter), p.rot(painter)), x, y)
+      )
+      assert.deepEqual(
+        pixelColor(p.flipVert(p.beside(painter, painter)), x, y),
+        pixelColor(p.beside(p.flipVert(painter), p.flipVert(painter)), x, y)
+      )
+      done()
+    })
+  })
+
+})
 
 // utils
 

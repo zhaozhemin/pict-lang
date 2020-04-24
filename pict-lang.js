@@ -229,7 +229,23 @@ function colorToPainter({draw=fill, style='#000'} = {}) {
   return vectsToPainter(vects, {draw: draw, style: style})
 }
 
-export {segmentsToPainter, vectsToPainter, svgPathToPainter, colorToPainter}
+function imageToPainter(image) {
+  let f = frame => ctx => {
+    let hiddenCanvas = document.createElement('canvas')
+    let {width, height} = image
+    hiddenCanvas.width = width
+    hiddenCanvas.height = height
+    let hiddenCtx = hiddenCanvas.getContext('2d')
+    // Flip the image
+    hiddenCtx.transform(1, 0, 0, -1, 0, height)
+    hiddenCtx.drawImage(image, 0, 0, width, height)
+    ctx.drawImage(hiddenCanvas, 0, 0, width, height, 0, 0, 1, 1)
+  }
+
+  return withTransform(f)
+}
+
+export {segmentsToPainter, vectsToPainter, svgPathToPainter, colorToPainter, imageToPainter}
 
 // Built-in Painters
 
