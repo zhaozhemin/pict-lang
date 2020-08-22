@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>A Picture Language in JavaScript</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background-color: #f8f8f8;
+        font-family: "Linux Libertine O", serif;
+        font-size: 10px;
+      }
+
+      body {
+        font-size: 2rem;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 88rem;
+        min-height: 100vh;
+        width: 88%;
+      }
+
+      h1 {
+        font-family: "Linux Biolinum O", sans-serif;
+        text-align: center;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+        font-size: 100%;
+      }
+
+      label {
+        display: inline-block;
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      li {
+        list-style: none;
+        display: inline-block;
+      }
+
+      #examples button {
+        background: #f9ddde;
+        border-radius: 5px;
+        border: 1px solid rgb(128, 64, 64);
+      }
+
+      #ops button,
+      #ops label {
+        background: white;
+        border: 1px solid black;
+        box-shadow: 3px 3px black;
+        padding: 0 0.5em;
+      }
+
+      #ops button:active,
+      #ops label:active {
+        transform: translate(3px, 3px);
+        box-shadow: none;
+      }
+
+      #container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #container textarea {
+        border: 2px solid black;
+        resize: none;
+        /* canvas' height plus paddings: 600 + 1rem * 2 */
+        width: 620px;
+        height: 300px;
+        padding: 1rem;
+        font-family: monospace;
+        font-size: 80%;
+      }
+
+      #container textarea:focus {
+        border: 2px solid rgb(128, 64, 64);
+        box-shadow: 0 0 5px rgb(128, 64, 64, 1);
+        outline: 0;
+      }
+
+      #container canvas {
+        border: 2px solid black;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>A Picture Language in JavaScript</h1>
+    <p>
+      This is a JavaScript implementation of Peter Henderson’s 1982 paper
+      <a href="https://eprints.soton.ac.uk/257577/1/funcgeo2.pdf">"Functional Geometry"</a>. The
+      most important element in this small language is called a painter. A painter is a one-argument
+      function, when called with a frame, "draws an image that is shifted and scaled to fit within a
+      designated parallelogram-shaped frame". Since it's just a function, we can utilize closure and
+      higher order function to combine simple painters to make complex painters. For more
+      information, check out the aforementioned paper,
+      <a href="https://sarabander.github.io/sicp/html/2_002e2.xhtml#g_t2_002e2_002e4"
+        >section 2.2.4</a
+      >
+      of SICP, and
+      <a href="https://github.com/zhaozhemin/pict-lang">the source code.</a>
+    </p>
+    <p>
+      <code>canvas</code>, <code>ctx</code>, <code>frame</code> are already initialized on the page,
+      so you can use these variables directly.
+    </p>
+    <p>Examples:</p>
+    <ul id="examples">
+      <li>
+        <button data-action="populateTextarea" data-code="fishCode" type="button">
+          fish
+        </button>
+      </li>
+      <li>
+        <button data-action="populateTextarea" data-code="squareLimitCode" type="button">
+          square limit
+        </button>
+      </li>
+      <li>
+        <button data-action="populateTextarea" data-code="rhombilleTilingCode" type="button">
+          rhombille tiling
+        </button>
+      </li>
+      <li>
+        <button data-action="populateTextarea" data-code="rebelFlagCode" type="button">
+          hello internet's rebel flag (sort of)
+        </button>
+      </li>
+      <li>
+        <button data-action="populateTextarea" data-code="imageCode" type="button">
+          image
+        </button>
+      </li>
+    </ul>
+    <div id="container">
+      <textarea placeholder="Write your code here" spellcheck="false"></textarea>
+      <ul id="ops">
+        <li>
+          <button data-action="drawCanvas" type="button">
+            drawCanvas
+          </button>
+        </li>
+        <li>
+          <button data-action="clearCanvas" type="button">
+            clearCanvas canvas
+          </button>
+        </li>
+        <li>
+          <label>upload an image<input type="file" accept="image/*" /></label>
+        </li>
+      </ul>
+      <canvas width="600" height="600"></canvas>
+    </div>
+    <script type="module">
+      import * as pict from "https://cdn.jsdelivr.net/gh/zhaozhemin/pict-lang/index.js"
+
+      Object.assign(window, pict)
+
+      function populateTextarea(event) {
+        textarea.value = ops[event.target.dataset.code]
+      }
+
+      function drawCanvas() {
+        eval(textarea.value)
+      }
+
+      function clearCanvas() {
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+      }
+
+      // Ah, these ugly indentations! If only I had something like
+      // textwrap.dedent() in JavaScript...
+      const fishCode = `\
+clearCanvas()
+fish(frame)(ctx)
+`
+      const rebelFlagCode = `\
+clearCanvas()
+beside(beside(black, blank), grey)(frame)(ctx)
+`
+      const squareLimitCode = `\
+${squareLimit.toString()}
+clearCanvas()
+squareLimit(4)(frame)(ctx)
+`
+      const rhombilleTilingCode = `\
+${rhombilleTiling.toString()}
+clearCanvas()
+rhombilleTiling(10)(frame)(ctx)
+`
+      const imageCode = `\
+clearCanvas()
+let img = document.createElement('img')
+img.src = URL.createObjectURL(document.querySelector('input').files[0])
+img.addEventListener('load', () => {
+  let paint = imageToPainter(img)
+  paint(frame)(ctx)
+})
+`
+
+      const ops = {
+        populateTextarea,
+        drawCanvas,
+        clearCanvas,
+        fishCode,
+        rebelFlagCode,
+        squareLimitCode,
+        rhombilleTilingCode,
+        imageCode,
+      }
+
+      const textarea = document.querySelector("textarea")
+      const canvas = document.querySelector("canvas")
+      const ctx = canvas.getContext("2d")
+      const frame = unitSquare
+
+      document.addEventListener("click", event => {
+        let {action} = event.target.dataset
+        if (action) {
+          ops[action](event)
+        }
+      })
+    </script>
+  </body>
+</html>
