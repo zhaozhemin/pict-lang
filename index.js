@@ -10,3 +10,5 @@ export {
 } from './pict-lang.js'
 
 export {fishPath, heartPath} from './paths.js'
+
+export {squareLimit, rhombilleTiling} from './examples.js'
